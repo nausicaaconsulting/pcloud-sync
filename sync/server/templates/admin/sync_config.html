@@ -1,0 +1,32 @@
+{% extends 'admin/admin_master.html' %}
+
+{% block body %}
+<h2>Synchronizations</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Login</th>
+            <th>Password</th>
+            <th>Local Folder</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sync in synchros %}
+        <tr>
+            <td>{{ sync.type }}</td>
+            <td>{{ sync.login }}</td>
+            <td>{{ sync.password }}</td>
+            <td>{{ sync.local_folder }}</td>
+            <td>
+                <form method="post" action="{{ url_for('.delete', index=loop.index0) }}" style="display:inline;">
+                    <button class="btn btn-danger" type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a class="btn btn-primary" href="{{ url_for('.add') }}">Add Synchronization</a>
+{% endblock %}

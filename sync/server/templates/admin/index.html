@@ -1,0 +1,27 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+{{ super() }}
+<div class="row-fluid">
+
+    <div>
+        {% if current_user.is_authenticated %}
+        <h1>Sync</h1>
+        <div class="">
+            <a class="btn btn-primary" href="{{ url_for('admin.logout_view') }}">Log out</a>
+        </div>
+        {% else %}
+        <form method="POST" action="">
+            {{ login_form.hidden_tag() if login_form.hidden_tag }}
+            <div class="form-group">
+                {{ login_form.login.label }}
+                {{ login_form.login(class='form-control') }}
+
+                {{ login_form.password.label }}
+                {{ login_form.password(class='form-control') }}
+            </div>
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock body %}

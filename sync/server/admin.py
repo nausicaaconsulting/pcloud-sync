@@ -1,27 +1,98 @@
-import datetime
-
-from flask import current_app, flash, redirect, request, url_for
-import warnings
 import logging
-
-from flask_admin import Admin, AdminIndexView, expose, helpers
-from flask_admin.contrib.sqla import ModelView
+import os
+import json
+import warnings
+from flask import redirect, request, url_for
 
 import flask_login as login
-
-from wtforms import fields, form, validators
+from flask_admin import Admin, BaseView, AdminIndexView, expose, helpers
+from wtforms import form, fields, validators
+from flask_admin.form import SecureForm
 
 from sync import settings
 
+# Chemin vers le fichier de configuration JSON
+CONFIG_FILE = "config.json"
 logger = logging.getLogger(__name__)
 
-# DEBUG
-class FeaturesModelView(ModelView):
-    can_delete = True
-    can_view_details = True
+# Fonction pour lire et écrire dans le fichier JSON
+def read_config():
+    """Lire le fichier JSON."""
+    if not os.path.exists(CONFIG_FILE):
+        return {"synchros": []}
+    with open(CONFIG_FILE, "r") as file:
+        return json.load(file)
+
+def write_config(data):
+    """Écrire dans le fichier JSON."""
+    with open(CONFIG_FILE, "w") as file:
+        json.dump(data, file, indent=4)
+
+# Formulaire pour gérer les synchronisations
+class SyncForm(form.Form):
+    type = fields.StringField('Type', validators=[validators.InputRequired()])
+    login = fields.StringField('Login', validators=[validators.InputRequired()])
+    password = fields.PasswordField('Password', validators=[validators.InputRequired()])
+    local_folder = fields.StringField('Local Folder', validators=[validators.InputRequired()])
+
+# Vue personnalisée pour gérer les synchronisations via Flask-Admin
+class SyncAdminView(BaseView):
+    form_base_class = SecureForm
 
     def is_accessible(self):
         return login.current_user.is_authenticated
+
+
+    @expose('/')
+    def index(self):
+        """Afficher la liste des synchronisations."""
+        config = read_config()
+        print(f"Config loaded: {config}")
+        return self.render('admin/sync_config.html', synchros=config["synchros"])
+
+    @expose('/add', methods=['GET', 'POST'])
+    def add(self):
+        """Ajouter une synchronisation."""
+        form = SyncForm(request.form)
+        if request.method == 'POST' and form.validate():
+            # Ajouter une nouvelle synchronisation au fichier JSON
+            new_sync = {
+                "type": form.type.data,
+                "login": form.login.data,
+                "password": form.password.data,
+                "local_folder": form.local_folder.data
+            }
+            config = read_config()
+            config["synchros"].append(new_sync)
+            write_config(config)
+            return redirect(url_for('.index'))
+        return self.render('admin/sync_form.html', form=form)
+
+    @expose('/delete/<int:index>', methods=['POST'])
+    def delete(self, index):
+        """Supprimer une synchronisation."""
+        config = read_config()
+        if 0 <= index < len(config["synchros"]):
+            del config["synchros"][index]
+            write_config(config)
+        return redirect(url_for('.index'))
+
+# Fonction pour enregistrer l'administration dans l'application principale
+def register_admin(app):
+    """Configurer Flask-Admin pour l'application principale."""
+    init_login(app)
+    admin = Admin(
+        app,
+        name="Sync",
+        index_view=AdminIndexViewWithAuth(),
+        base_template='admin/admin_master.html',
+        template_mode="bootstrap3",
+    )
+    with warnings.catch_warnings():
+        # Supprimer les avertissements inutiles
+        warnings.filterwarnings('ignore', 'Fields missing from ruleset', UserWarning)
+        admin.add_view(SyncAdminView(name="Synchronizations", endpoint="sync_admin"))
+    print("===============>Admin registered")
 
 
 class User:
@@ -97,23 +168,3 @@ def init_login(app):
     @login_manager.user_loader
     def load_user(_user_id):
         return User()
-
-
-def register_admin(app):
-    init_login(app)
-    admin = Admin(
-        name="Stock listing",
-        index_view=AdminIndexViewWithAuth(),
-        base_template='admin_master.html',
-        template_mode="bootstrap3",
-    )
-    with warnings.catch_warnings():
-        # avoid warn when fields are excluded from a form
-        warnings.filterwarnings('ignore', 'Fields missing from ruleset', UserWarning)
-        #admin.add_view(FeaturesModelView(models.Features, db.session))
-
-        admin.init_app(app)
-    # Root url should redirect to the admin
-    app.add_url_rule('/', view_func=lambda: redirect(url_for('admin.index')))
-
-    return

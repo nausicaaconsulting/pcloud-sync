@@ -1,0 +1,25 @@
+{% extends 'admin/admin_master.html' %}
+
+{% block body %}
+<h2>Add Synchronization</h2>
+<form method="post" action="">
+    <div class="form-group">
+        <label for="type">Type</label>
+        {{ form.type(class="form-control", id="type") }}
+    </div>
+    <div class="form-group">
+        <label for="login">Login</label>
+        {{ form.login(class="form-control", id="login") }}
+    </div>
+    <div class="form-group">
+        <label for="password">Password</label>
+        {{ form.password(class="form-control", id="password") }}
+    </div>
+    <div class="form-group">
+        <label for="local_folder">Local Folder</label>
+        {{ form.local_folder(class="form-control", id="local_folder") }}
+    </div>
+    <button class="btn btn-success" type="submit">Add Synchronization</button>
+</form>
+<a class="btn btn-secondary" href="{{ url_for('.index') }}">Back to List</a>
+{% endblock %}

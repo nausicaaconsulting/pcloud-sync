@@ -1,0 +1,10 @@
+{
+    "synchros": [
+        {
+            "type": "pcloud",
+            "login": "toto@tata.fr",
+            "password": "coucou",
+            "local_folder": "/home/guillaume/test"
+        }
+    ]
+}
