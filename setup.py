@@ -4,15 +4,11 @@ from setuptools import setup
 setup(
     name='sync',
     install_requires=[
+        'apscheduler',
         'Flask',
         'Flask-Admin',
         'flask-restx',
         'flask-login',
-
-        # ORM
-        'Flask-SQLAlchemy',
-        'SQLAlchemy',
-        'Flask-Migrate',
 
         # Environment variable parsing
         'environs',

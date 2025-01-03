@@ -47,7 +47,6 @@ class SyncAdminView(BaseView):
     def index(self):
         """Afficher la liste des synchronisations."""
         config = read_config()
-        print(f"Config loaded: {config}")
         return self.render('admin/sync_config.html', synchros=config["synchros"])
 
     @expose('/add', methods=['GET', 'POST'])
@@ -77,7 +76,6 @@ class SyncAdminView(BaseView):
             write_config(config)
         return redirect(url_for('.index'))
 
-# Fonction pour enregistrer l'administration dans l'application principale
 def register_admin(app):
     """Configurer Flask-Admin pour l'application principale."""
     init_login(app)
@@ -89,10 +87,8 @@ def register_admin(app):
         template_mode="bootstrap3",
     )
     with warnings.catch_warnings():
-        # Supprimer les avertissements inutiles
         warnings.filterwarnings('ignore', 'Fields missing from ruleset', UserWarning)
         admin.add_view(SyncAdminView(name="Synchronizations", endpoint="sync_admin"))
-    print("===============>Admin registered")
 
 
 class User:

@@ -1,8 +1,10 @@
 import logging
+import os
 import sys
 
 from flask import Flask
 
+from sync.scheduler import start_scheduler
 from sync.server.extensions import db, migrate
 
 from sync.server.api import api_blueprint
@@ -19,6 +21,10 @@ def create_app(config_object="sync.settings"):
     register_shellcontext(app)
     register_commands(app)
     configure_logger(app)
+    ###
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        start_scheduler()
+
     return app
 
 
@@ -67,6 +73,8 @@ def configure_logger(app):
     werkzeug_logger.addFilter(lambda record: '/api/1/process-info/update' not in record.getMessage())
 
 
-if __name__ == '__main__':
-    app = create_app()
-    app.run(debug=True)
+#if __name__ == '__main__':
+#    app = create_app()
+#    app.run(debug=True)
+
+
