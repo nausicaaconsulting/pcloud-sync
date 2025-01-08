@@ -5,7 +5,6 @@ import sys
 from flask import Flask
 
 from sync.scheduler import start_scheduler
-from sync.server.extensions import db, migrate
 
 from sync.server.api import api_blueprint
 from sync.server.admin import register_admin
@@ -14,24 +13,16 @@ from sync.server.admin import register_admin
 def create_app(config_object="sync.settings"):
     app = Flask(__name__)
     app.config.from_object(config_object)
-    register_extensions(app)
     register_admin(app)
     register_blueprints(app)
     register_errorhandlers(app)
-    register_shellcontext(app)
-    register_commands(app)
     configure_logger(app)
+
     ###
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
-        start_scheduler()
+        start_scheduler(app)
 
     return app
-
-
-def register_extensions(app):
-    db.init_app(app)
-    migrate.init_app(app, db)
-    return
 
 
 def register_blueprints(app):
@@ -40,18 +31,6 @@ def register_blueprints(app):
 
 
 def register_errorhandlers(app):
-    pass
-
-
-def register_shellcontext(app):
-    def shell_context():
-        return {"db": db}
-
-    app.shell_context_processor(shell_context)
-
-
-def register_commands(app):
-    """Register Click commands."""
     pass
 
 
@@ -73,8 +52,8 @@ def configure_logger(app):
     werkzeug_logger.addFilter(lambda record: '/api/1/process-info/update' not in record.getMessage())
 
 
-#if __name__ == '__main__':
-#    app = create_app()
-#    app.run(debug=True)
+if __name__ == '__main__':
+    app = create_app()
+    app.run(debug=True)
 
 

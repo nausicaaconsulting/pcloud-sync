@@ -1,14 +1,21 @@
+from flask import Flask, current_app
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
 
-def sync_task():
-    """Fonction de synchronisation principale."""
-    print(f"Synchronization started at {datetime.now()}")
+from sync.server.config import read_config
 
-def start_scheduler():
-    """Démarrer le scheduler."""
+
+def sync_task(synchro):
+    """Fonction de synchronisation principale."""
+    print(f"Synchronization started at {datetime.now()} - with params: {synchro}")
+
+def start_scheduler(app):
     print("Starting scheduler...")
+    config = read_config()
+    synchros = config.get('synchros')
     scheduler = BackgroundScheduler()
 
-    scheduler.add_job(sync_task, 'interval', seconds=5)
+    for synchro in synchros:
+        if synchro.get('enabled'):
+            scheduler.add_job(sync_task, 'interval', seconds=synchro.get('interval'), args=[synchro])
     scheduler.start()

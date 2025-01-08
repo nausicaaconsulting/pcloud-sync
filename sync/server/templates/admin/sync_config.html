@@ -19,6 +19,8 @@
             <td>{{ sync.login }}</td>
             <td>{{ sync.password }}</td>
             <td>{{ sync.local_folder }}</td>
+            <td>{{ sync.interval }}</td>
+            <td>{{ sync.enabled }}</td>
             <td>
                 <form method="post" action="{{ url_for('.delete', index=loop.index0) }}" style="display:inline;">
                     <button class="btn btn-danger" type="submit">Delete</button>

@@ -19,6 +19,18 @@
         <label for="local_folder">Local Folder</label>
         {{ form.local_folder(class="form-control", id="local_folder") }}
     </div>
+    <div class="form-group">
+        <label for="interval">Interval</label>
+        {{ form.interval(class="form-control", id="interval") }}
+    </div>
+    <div class="form-group">
+        <label for="interval">Local Folder</label>
+        {{ form.local_folder(class="form-control", id="interval") }}
+    </div>
+    <div class="form-group">
+        <label for="enabled">Enabled</label>
+        {{ form.enabled(class="form-control", id="enabled") }}
+    </div>
     <button class="btn btn-success" type="submit">Add Synchronization</button>
 </form>
 <a class="btn btn-secondary" href="{{ url_for('.index') }}">Back to List</a>

@@ -4,7 +4,9 @@
             "type": "pcloud",
             "login": "toto@tata.fr",
             "password": "coucou",
-            "local_folder": "/home/guillaume/test"
+            "local_folder": "/home/guillaume/test",
+            "interval": 5,
+            "enabled": true
         }
     ]
 }

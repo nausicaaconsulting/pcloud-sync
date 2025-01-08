@@ -1,6 +1,4 @@
 import logging
-import os
-import json
 import warnings
 from flask import redirect, request, url_for
 
@@ -10,23 +8,11 @@ from wtforms import form, fields, validators
 from flask_admin.form import SecureForm
 
 from sync import settings
+from sync.server.config import read_config, write_config
 
 # Chemin vers le fichier de configuration JSON
-CONFIG_FILE = "config.json"
 logger = logging.getLogger(__name__)
 
-# Fonction pour lire et écrire dans le fichier JSON
-def read_config():
-    """Lire le fichier JSON."""
-    if not os.path.exists(CONFIG_FILE):
-        return {"synchros": []}
-    with open(CONFIG_FILE, "r") as file:
-        return json.load(file)
-
-def write_config(data):
-    """Écrire dans le fichier JSON."""
-    with open(CONFIG_FILE, "w") as file:
-        json.dump(data, file, indent=4)
 
 # Formulaire pour gérer les synchronisations
 class SyncForm(form.Form):
@@ -34,6 +20,8 @@ class SyncForm(form.Form):
     login = fields.StringField('Login', validators=[validators.InputRequired()])
     password = fields.PasswordField('Password', validators=[validators.InputRequired()])
     local_folder = fields.StringField('Local Folder', validators=[validators.InputRequired()])
+    interval = fields.IntegerField('Interval', validators=[validators.InputRequired()])
+    enabled = fields.BooleanField('Enabled', validators=[validators.InputRequired()])
 
 # Vue personnalisée pour gérer les synchronisations via Flask-Admin
 class SyncAdminView(BaseView):
@@ -59,7 +47,9 @@ class SyncAdminView(BaseView):
                 "type": form.type.data,
                 "login": form.login.data,
                 "password": form.password.data,
-                "local_folder": form.local_folder.data
+                "local_folder": form.local_folder.data,
+                "interval": form.interval.data,
+                "enabled": form.enabled.data
             }
             config = read_config()
             config["synchros"].append(new_sync)
